@@ -1,0 +1,319 @@
+# Implementation Plan
+
+- [ ] 1. Set up project structure and core interfaces
+  - Create TypeScript project with Three.js dependencies
+    - Initialize npm project with `package.json`
+    - Install Three.js, TypeScript, and @types/three
+    - Install development dependencies: jest, webpack/vite, ts-loader
+  - Define core interfaces for TubeGeometry, Tetromino, TubeGrid, and GameEngine
+    - Create `src/types/` directory for interface definitions
+    - Define `TetrominoShape`, `GameState`, `InputController` interfaces
+    - Create enums for `TetrominoType` and `GameStatus`
+  - Set up build configuration with webpack/vite for Three.js
+    - Configure TypeScript compilation settings
+    - Set up development server with hot reload
+    - Configure asset loading for textures and models
+  - _Requirements: 1.1, 4.1_
+
+- [ ] 2. Implement TubeGeometry and coordinate system
+  - Create TubeGeometry class with radius, height, and segment properties
+    - Define constructor with configurable radius (default 5), height (default 20), segments (default 8)
+    - Add getter methods for segment angle calculations
+    - Implement boundary validation for segment and row indices
+  - Implement coordinate conversion methods between tube coordinates and world coordinates
+    - Create `tubeToWorld(segment: number, row: number): Vector3` method
+    - Create `worldToTube(position: Vector3): {segment: number, row: number}` method
+    - Handle wrapping around tube circumference (modulo arithmetic)
+  - Write unit tests for coordinate conversion accuracy
+    - Test conversion round-trip accuracy (tube -> world -> tube)
+    - Test boundary cases (segment 0, max segment, negative values)
+    - Test wrapping behavior around circumference
+  - _Requirements: 1.1, 4.1_
+
+- [ ] 3. Create basic Three.js scene setup
+  - Initialize Three.js scene, camera, and renderer
+    - Create WebGLRenderer with antialias and alpha settings
+    - Set up PerspectiveCamera with 75° FOV and appropriate aspect ratio
+    - Initialize Scene with background color and basic lighting (AmbientLight + DirectionalLight)
+  - Position camera at angle to show entire tube circumference
+    - Position camera at distance to frame entire tube (approximately 15-20 units back)
+    - Angle camera slightly above tube center (15-30 degrees) for optimal visibility
+    - Implement camera controls for development/debugging (OrbitControls)
+  - Create basic cylinder geometry for the tube visualization
+    - Use CylinderGeometry with matching TubeGeometry parameters
+    - Apply wireframe material for initial visualization
+    - Add tube to scene and position at origin
+  - Implement basic render loop
+    - Create animation loop using requestAnimationFrame
+    - Handle window resize events and update camera/renderer
+    - Add basic FPS counter for performance monitoring
+  - _Requirements: 1.1, 4.1_
+
+- [ ] 4. Implement Tetromino class and shapes
+  - Define TetrominoShape interface with block positions and colors
+    - Create interface with `blocks: Vector2[]`, `color: Color`, `type: TetrominoType`
+    - Define TetrominoType enum with I, O, T, S, Z, J, L values
+    - Create static shape definitions for all 7 tetromino types
+  - Create Tetromino class with standard piece types (I, O, T, S, Z, J, L)
+    - Implement constructor accepting TetrominoType
+    - Add properties for current position (Vector3) and rotation state (0-3)
+    - Create factory method `createRandomTetromino()` for piece generation
+  - Implement tetromino rotation logic (90-degree increments)
+    - Create `rotate()` method that cycles through 4 rotation states
+    - Implement rotation matrices for each piece type
+    - Handle special cases (O-piece doesn't rotate, I-piece has 2 states)
+  - Write unit tests for tetromino rotation and block position calculation
+    - Test all piece types rotate correctly through all 4 states
+    - Verify block positions are calculated correctly for each rotation
+    - Test edge cases like rotating O-piece and I-piece behavior
+  - _Requirements: 1.2, 1.4_
+
+- [ ] 5. Create TubeGrid for game state management
+  - Implement TubeGrid class with segment and row-based grid system
+    - Create 2D array structure `grid: (Tetromino | null)[][]` indexed by [segment][row]
+    - Add constructor accepting segments and rows parameters
+    - Implement `clear()` method to reset grid state
+  - Add methods for checking cell occupation and placing pieces
+    - Create `isOccupied(segment: number, row: number): boolean` method
+    - Implement `placePiece(tetromino: Tetromino, tubeRotation: number): void`
+    - Add `canPlacePiece(tetromino: Tetromino, tubeRotation: number): boolean` for validation
+    - Handle coordinate wrapping around tube circumference
+  - Implement complete ring detection around tube circumference
+    - Create `checkCompleteRings(): number[]` method returning array of completed row indices
+    - Verify all segments in a row are occupied
+    - Return multiple rows if several rings completed simultaneously
+  - Write unit tests for grid operations and ring detection
+    - Test piece placement in various positions and rotations
+    - Verify collision detection works correctly
+    - Test ring completion detection with partial and complete rings
+    - Test edge cases like placing pieces at segment boundaries
+  - _Requirements: 2.1, 2.2_
+
+- [ ] 6. Implement tube rotation mechanics
+  - Add tube rotation property to game state
+    - Add `tubeRotation: number` property to GameState (in radians)
+    - Create `targetRotation: number` for smooth animation interpolation
+    - Implement rotation speed constant (e.g., π/4 radians per step)
+  - Create smooth rotation animation using Three.js tweening
+    - Install and configure TWEEN.js or use Three.js built-in animation
+    - Create `rotateTube(direction: number)` method with smooth interpolation
+    - Implement easing functions for natural rotation feel
+    - Ensure rotation wraps correctly at 2π radians
+  - Ensure tetrominoes maintain horizontal orientation during tube rotation
+    - Apply inverse rotation to tetromino meshes to keep them horizontal
+    - Update tetromino world positions during tube rotation
+    - Maintain consistent visual appearance regardless of tube rotation
+  - Write tests for rotation boundary handling and animation smoothness
+    - Test rotation wrapping at 0/2π boundaries
+    - Verify tetrominoes maintain horizontal orientation
+    - Test rapid rotation inputs don't break animation
+    - Measure animation frame consistency
+  - _Requirements: 1.3, 1.4, 4.3_
+
+- [ ] 7. Add piece falling and collision detection
+  - Implement gravity system for tetromino pieces falling downward
+    - Add `fallTimer: number` and `fallSpeed: number` to game state
+    - Create `updateFalling(deltaTime: number)` method for time-based falling
+    - Implement variable fall speeds based on game level
+    - Add soft drop functionality for faster falling
+  - Create collision detection for pieces hitting bottom or other pieces
+    - Implement `checkCollision(tetromino: Tetromino, position: Vector3): boolean`
+    - Check collision with tube bottom boundary
+    - Check collision with existing pieces in grid
+    - Handle collision detection during tube rotation
+  - Add piece locking mechanism when collision occurs
+    - Create `lockPiece()` method to place piece in grid permanently
+    - Implement lock delay timer for player adjustment time
+    - Generate new piece after locking current piece
+    - Update visual representation when piece locks
+  - Write unit tests for collision detection accuracy
+    - Test collision with bottom boundary
+    - Test collision with existing pieces at various positions
+    - Test collision during tube rotation scenarios
+    - Verify lock timing and new piece generation
+  - _Requirements: 2.1, 1.2_
+
+- [ ] 8. Implement input handling system
+  - Create InputController class for keyboard input processing
+    - Set up event listeners for keydown/keyup events
+    - Create key mapping configuration (Arrow keys, WASD, Space, etc.)
+    - Implement key state tracking for held keys vs single presses
+    - Add support for custom key bindings
+  - Map keys to tube rotation (left/right) and piece actions (soft drop, hard drop, rotate)
+    - Left/Right arrows: rotate tube clockwise/counterclockwise
+    - Down arrow: soft drop (faster falling)
+    - Space: hard drop (instant drop to bottom)
+    - Up arrow: rotate current tetromino piece
+    - P: pause/unpause game
+  - Add input rate limiting to prevent excessive commands
+    - Implement debouncing for rotation commands (prevent spam)
+    - Add repeat delay for held keys (initial delay + repeat rate)
+    - Create input buffer for smooth gameplay during lag
+    - Prevent input processing during animations or game over
+  - Write integration tests for input response
+    - Test all key mappings trigger correct game actions
+    - Verify rate limiting prevents input spam
+    - Test input during various game states (playing, paused, game over)
+    - Test simultaneous key presses and conflicts
+  - _Requirements: 1.3, 1.4, 4.3_
+
+- [ ] 9. Add line clearing and scoring system
+  - Implement ring clearing logic when complete rings are formed
+    - Create `clearRings(ringIndices: number[])` method
+    - Remove all pieces from completed rings
+    - Move all pieces above cleared rings down by appropriate number of rows
+    - Handle multiple simultaneous ring clears
+  - Create scoring system with points for cleared rings and bonus for multiple rings
+    - Implement base scoring: 100 points per ring cleared
+    - Add multipliers: 2x for 2 rings, 3x for 3 rings, 4x for 4+ rings (Tetris bonus)
+    - Include level multiplier for higher difficulty scoring
+    - Track total lines cleared for level progression
+  - Add visual feedback for ring clearing animations
+    - Create flashing/highlighting effect for completed rings before clearing
+    - Implement smooth animation for pieces falling after ring clear
+    - Add particle effects or visual flourishes for multiple ring clears
+    - Display score popup animations when rings are cleared
+  - Write unit tests for scoring calculations and ring clearing
+    - Test scoring formulas for single and multiple ring clears
+    - Verify pieces fall correctly after rings are cleared
+    - Test edge cases like clearing rings at top/bottom of tube
+    - Validate line count tracking for level progression
+  - _Requirements: 2.2, 2.3_
+
+- [ ] 10. Implement game progression and difficulty
+  - Create level system that increases falling speed over time
+    - Start at level 1 with base fall speed (e.g., 1 second per row)
+    - Increase level every 10 lines cleared
+    - Reduce fall time by 10% per level (exponential difficulty increase)
+    - Cap minimum fall time to maintain playability
+  - Add game over detection when pieces reach top of tube
+    - Check if new piece spawn position is occupied
+    - Implement "lock out" game over (piece locks above visible area)
+    - Add "block out" game over (piece cannot spawn due to obstruction)
+    - Trigger game over state and stop piece generation
+  - Implement score and level display
+    - Create UI overlay showing current score, level, and lines cleared
+    - Add next piece preview window
+    - Display current fall speed or time remaining
+    - Show high score tracking (localStorage persistence)
+  - Write tests for level progression and game over conditions
+    - Test level increases at correct line intervals
+    - Verify fall speed changes appropriately with level
+    - Test game over triggers in various scenarios
+    - Validate UI updates correctly with game state changes
+  - _Requirements: 3.1, 3.2, 3.3_
+
+- [ ] 11. Add visual rendering for tetrominoes
+  - Create 3D block meshes for tetromino pieces using BoxGeometry
+    - Create standard block size (e.g., 1x1x1 units) with slight gaps between blocks
+    - Add rounded edges or beveled corners for visual appeal
+    - Implement consistent block proportions that fit tube segments
+    - Create reusable block geometry for all tetromino types
+  - Implement different materials/colors for each tetromino type
+    - Define color scheme: I=cyan, O=yellow, T=purple, S=green, Z=red, J=blue, L=orange
+    - Create MeshLambertMaterial or MeshPhongMaterial for each color
+    - Add subtle texture or normal maps for visual depth
+    - Implement emissive properties for active piece highlighting
+  - Use InstancedMesh for efficient rendering of multiple blocks
+    - Create InstancedMesh for each tetromino color/type
+    - Update instance matrices for block positions efficiently
+    - Implement frustum culling for off-screen blocks
+    - Batch render calls to minimize draw calls
+  - Add visual distinction between active piece and placed pieces
+    - Make active piece slightly brighter or add outline effect
+    - Reduce opacity or saturation of placed pieces
+    - Add subtle animation (pulsing, glowing) to active piece
+    - Implement different lighting for active vs placed pieces
+  - _Requirements: 4.2, 4.4_
+
+- [ ] 12. Implement piece preview and placement feedback
+  - Add ghost piece showing where active piece will land
+    - Calculate landing position using collision detection
+    - Render ghost piece with transparent/wireframe material
+    - Update ghost position in real-time as tube rotates
+    - Hide ghost piece when it overlaps with active piece
+  - Create visual preview of next piece
+    - Add separate small 3D scene for next piece display
+    - Position next piece in UI overlay area
+    - Rotate next piece slowly for better visibility
+    - Update preview when new piece is generated
+  - Implement smooth animations for piece placement
+    - Add smooth falling animation with easing
+    - Create lock-in animation when piece is placed
+    - Implement tube rotation animation with momentum
+    - Add subtle camera shake or zoom effects for dramatic moments
+  - Write visual tests for preview accuracy
+    - Verify ghost piece matches actual landing position
+    - Test ghost piece updates correctly during tube rotation
+    - Validate next piece preview shows correct piece type and color
+    - Test animation smoothness and timing consistency
+  - _Requirements: 4.4_
+
+- [ ] 13. Add game state management and controls
+  - Implement pause/resume functionality
+    - Add pause state to GameState enum (Playing, Paused, GameOver)
+    - Pause all timers and animations when paused
+    - Display pause overlay with resume instructions
+    - Prevent input processing except for unpause command
+  - Add game restart capability
+    - Create `resetGame()` method to clear grid and reset state
+    - Reset score, level, and lines cleared to initial values
+    - Generate new starting piece and clear tube rotation
+    - Provide restart option from game over screen and pause menu
+  - Create game over screen with final score
+    - Display final score, level reached, and total lines cleared
+    - Show high score comparison and new high score celebration
+    - Provide options to restart game or return to main menu
+    - Add social sharing functionality for high scores
+  - Write integration tests for game state transitions
+    - Test pause/resume maintains game state correctly
+    - Verify restart resets all game components properly
+    - Test game over triggers and screen display
+    - Validate state transitions don't cause memory leaks
+  - _Requirements: 3.3_
+
+- [ ] 14. Optimize performance and add error handling
+  - Implement object pooling for tetromino pieces
+    - Create TetrominoPool class to reuse piece objects
+    - Pool mesh instances to avoid frequent creation/destruction
+    - Implement efficient allocation and deallocation strategies
+    - Monitor pool usage and adjust pool sizes dynamically
+  - Add WebGL context loss recovery
+    - Listen for webglcontextlost and webglcontextrestored events
+    - Implement texture and geometry restoration after context loss
+    - Gracefully handle context loss during gameplay
+    - Display user-friendly message during context restoration
+  - Implement fallback rendering for performance issues
+    - Detect low frame rates and reduce visual quality automatically
+    - Implement simplified rendering mode with fewer effects
+    - Reduce particle effects and animations on slower devices
+    - Provide manual graphics quality settings
+  - Add comprehensive error boundaries and logging
+    - Implement try-catch blocks around critical game operations
+    - Add detailed logging for debugging and error tracking
+    - Create user-friendly error messages for common issues
+    - Implement crash reporting and recovery mechanisms
+  - _Requirements: 4.3_
+
+- [ ] 15. Create comprehensive test suite
+  - Write end-to-end tests for complete gameplay scenarios
+    - Test complete game from start to game over
+    - Simulate full gameplay sessions with piece placement and line clearing
+    - Test level progression and difficulty scaling
+    - Validate score calculations throughout entire games
+  - Add performance tests for frame rate and memory usage
+    - Monitor frame rate during intensive gameplay (many pieces on screen)
+    - Test memory usage over extended play sessions
+    - Benchmark rendering performance with different graphics settings
+    - Profile CPU usage during complex animations and calculations
+  - Implement visual regression tests for rendering accuracy
+    - Capture screenshots of key game states for comparison
+    - Test rendering consistency across different browsers/devices
+    - Verify visual elements render correctly after code changes
+    - Test camera positioning and tube visibility from all angles
+  - Create automated tests for all game mechanics
+    - Test all tetromino rotations and placements
+    - Verify collision detection in all scenarios
+    - Test tube rotation mechanics and coordinate conversions
+    - Validate scoring, level progression, and game over conditions
+  - _Requirements: 1.1, 2.1, 3.1, 4.1_
