@@ -45,7 +45,7 @@ A 3D Tetris-like puzzle game where traditional Tetris pieces (tetrominoes) fall 
 - **Three.js**: 3D graphics rendering
 - **TypeScript**: Type-safe JavaScript development
 - **Vite**: Fast build tool and development server
-- **Jest**: Testing framework
+- **Vitest**: Modern testing framework
 
 ## Game Concept
 

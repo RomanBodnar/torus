@@ -26,5 +26,10 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['three']
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/setupTests.ts']
   }
 });
