@@ -1,10 +1,10 @@
 # Implementation Plan
 
-- [ ] 1. Set up project structure and core interfaces
+- [x] 1. Set up project structure and core interfaces
   - Create TypeScript project with Three.js dependencies
     - Initialize npm project with `package.json`
     - Install Three.js, TypeScript, and @types/three
-    - Install development dependencies: jest, webpack/vite, ts-loader
+    - Install development dependencies: vitest, webpack/vite, ts-loader
   - Define core interfaces for TubeGeometry, Tetromino, TubeGrid, and GameEngine
     - Create `src/types/` directory for interface definitions
     - Define `TetrominoShape`, `GameState`, `InputController` interfaces
