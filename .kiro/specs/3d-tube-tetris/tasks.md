@@ -16,304 +16,312 @@
   - _Requirements: 1.1, 4.1_
 
 - [ ] 2. Implement TubeGeometry and coordinate system
-  - Create TubeGeometry class with radius, height, and segment properties
-    - Define constructor with configurable radius (default 5), height (default 20), segments (default 8)
-    - Add getter methods for segment angle calculations
-    - Implement boundary validation for segment and row indices
-  - Implement coordinate conversion methods between tube coordinates and world coordinates
-    - Create `tubeToWorld(segment: number, row: number): Vector3` method
-    - Create `worldToTube(position: Vector3): {segment: number, row: number}` method
-    - Handle wrapping around tube circumference (modulo arithmetic)
-  - Write unit tests for coordinate conversion accuracy
-    - Test conversion round-trip accuracy (tube -> world -> tube)
-    - Test boundary cases (segment 0, max segment, negative values)
-    - Test wrapping behavior around circumference
+- [ ] 2.1 Create TubeGeometry class with basic properties
+  - Create `src/core/TubeGeometry.ts` file
+  - Implement constructor with radius=5, height=20, segments=8 defaults
+  - Add readonly properties for radius, height, segments
+  - _Requirements: 1.1, 4.1_
+- [ ] 2.2 Add coordinate conversion methods
+  - Implement `getSegmentAngle(segment: number): number` method
+  - Implement `tubeToWorld(segment: number, row: number): Vector3` method
+  - Implement `worldToTube(position: Vector3): {segment: number, row: number}` method
+  - _Requirements: 1.1, 4.1_
+- [ ] 2.3 Write unit tests for TubeGeometry
+  - Create `src/core/__tests__/TubeGeometry.test.ts`
+  - Test coordinate conversion round-trip accuracy
+  - Test boundary cases and wrapping behavior
   - _Requirements: 1.1, 4.1_
 
 - [ ] 3. Create basic Three.js scene setup
-  - Initialize Three.js scene, camera, and renderer
-    - Create WebGLRenderer with antialias and alpha settings
-    - Set up PerspectiveCamera with 75° FOV and appropriate aspect ratio
-    - Initialize Scene with background color and basic lighting (AmbientLight + DirectionalLight)
-  - Position camera at angle to show entire tube circumference
-    - Position camera at distance to frame entire tube (approximately 15-20 units back)
-    - Angle camera slightly above tube center (15-30 degrees) for optimal visibility
-    - Implement camera controls for development/debugging (OrbitControls)
-  - Create basic cylinder geometry for the tube visualization
-    - Use CylinderGeometry with matching TubeGeometry parameters
-    - Apply wireframe material for initial visualization
-    - Add tube to scene and position at origin
-  - Implement basic render loop
-    - Create animation loop using requestAnimationFrame
-    - Handle window resize events and update camera/renderer
-    - Add basic FPS counter for performance monitoring
+- [ ] 3.1 Initialize Three.js renderer and scene
+  - Create `src/core/SceneManager.ts` file
+  - Initialize WebGLRenderer with antialias and alpha settings
+  - Create Scene with background color and basic lighting
+  - _Requirements: 1.1, 4.1_
+- [ ] 3.2 Set up camera and controls
+  - Create PerspectiveCamera with 75° FOV
+  - Position camera to frame entire tube (15-20 units back, 15-30° above)
+  - Add OrbitControls for development/debugging
+  - _Requirements: 1.1, 4.1_
+- [ ] 3.3 Create tube visualization
+  - Create CylinderGeometry matching TubeGeometry parameters
+  - Apply wireframe material for initial visualization
+  - Add tube mesh to scene at origin
+  - _Requirements: 1.1, 4.1_
+- [ ] 3.4 Implement render loop and window handling
+  - Create animation loop using requestAnimationFrame
+  - Handle window resize events
+  - Add basic FPS counter for performance monitoring
   - _Requirements: 1.1, 4.1_
 
 - [ ] 4. Implement Tetromino class and shapes
-  - Define TetrominoShape interface with block positions and colors
-    - Create interface with `blocks: Vector2[]`, `color: Color`, `type: TetrominoType`
-    - Define TetrominoType enum with I, O, T, S, Z, J, L values
-    - Create static shape definitions for all 7 tetromino types
-  - Create Tetromino class with standard piece types (I, O, T, S, Z, J, L)
-    - Implement constructor accepting TetrominoType
-    - Add properties for current position (Vector3) and rotation state (0-3)
-    - Create factory method `createRandomTetromino()` for piece generation
-  - Implement tetromino rotation logic (90-degree increments)
-    - Create `rotate()` method that cycles through 4 rotation states
-    - Implement rotation matrices for each piece type
-    - Handle special cases (O-piece doesn't rotate, I-piece has 2 states)
-  - Write unit tests for tetromino rotation and block position calculation
-    - Test all piece types rotate correctly through all 4 states
-    - Verify block positions are calculated correctly for each rotation
-    - Test edge cases like rotating O-piece and I-piece behavior
+- [ ] 4.1 Create tetromino shape definitions
+  - Create `src/game/TetrominoShapes.ts` file
+  - Define static shape data for all 7 tetromino types (I, O, T, S, Z, J, L)
+  - Include block positions, colors, and rotation states for each type
+  - _Requirements: 1.2, 1.4_
+- [ ] 4.2 Implement Tetromino class
+  - Create `src/game/Tetromino.ts` file
+  - Implement constructor accepting TetrominoType
+  - Add properties for position, rotation state, and shape data
+  - _Requirements: 1.2, 1.4_
+- [ ] 4.3 Add tetromino rotation logic
+  - Implement `rotate()` method for 90-degree increments
+  - Handle special cases (O-piece, I-piece)
+  - Add `getBlockPositions()` method for current rotated positions
+  - _Requirements: 1.2, 1.4_
+- [ ] 4.4 Write unit tests for Tetromino class
+  - Create `src/game/__tests__/Tetromino.test.ts`
+  - Test rotation logic for all piece types
+  - Test block position calculations
   - _Requirements: 1.2, 1.4_
 
 - [ ] 5. Create TubeGrid for game state management
-  - Implement TubeGrid class with segment and row-based grid system
-    - Create 2D array structure `grid: (Tetromino | null)[][]` indexed by [segment][row]
-    - Add constructor accepting segments and rows parameters
-    - Implement `clear()` method to reset grid state
-  - Add methods for checking cell occupation and placing pieces
-    - Create `isOccupied(segment: number, row: number): boolean` method
-    - Implement `placePiece(tetromino: Tetromino, tubeRotation: number): void`
-    - Add `canPlacePiece(tetromino: Tetromino, tubeRotation: number): boolean` for validation
-    - Handle coordinate wrapping around tube circumference
-  - Implement complete ring detection around tube circumference
-    - Create `checkCompleteRings(): number[]` method returning array of completed row indices
-    - Verify all segments in a row are occupied
-    - Return multiple rows if several rings completed simultaneously
-  - Write unit tests for grid operations and ring detection
-    - Test piece placement in various positions and rotations
-    - Verify collision detection works correctly
-    - Test ring completion detection with partial and complete rings
-    - Test edge cases like placing pieces at segment boundaries
+- [ ] 5.1 Implement TubeGrid class structure
+  - Create `src/game/TubeGrid.ts` file
+  - Implement constructor with segments and rows parameters
+  - Create 2D array structure `grid: (Tetromino | null)[][]`
+  - Add `clear()` method to reset grid state
+  - _Requirements: 2.1, 2.2_
+- [ ] 5.2 Add grid occupation and placement methods
+  - Implement `isOccupied(segment: number, row: number): boolean`
+  - Implement `canPlacePiece(tetromino: Tetromino, tubeRotation: number): boolean`
+  - Implement `placePiece(tetromino: Tetromino, tubeRotation: number): void`
+  - _Requirements: 2.1, 2.2_
+- [ ] 5.3 Implement ring completion detection
+  - Create `checkCompleteRings(): number[]` method
+  - Verify all segments in a row are occupied
+  - Handle multiple simultaneous ring completions
+  - _Requirements: 2.1, 2.2_
+- [ ] 5.4 Write unit tests for TubeGrid
+  - Create `src/game/__tests__/TubeGrid.test.ts`
+  - Test piece placement and collision detection
+  - Test ring completion detection
   - _Requirements: 2.1, 2.2_
 
 - [ ] 6. Implement tube rotation mechanics
-  - Add tube rotation property to game state
-    - Add `tubeRotation: number` property to GameState (in radians)
-    - Create `targetRotation: number` for smooth animation interpolation
-    - Implement rotation speed constant (e.g., π/4 radians per step)
-  - Create smooth rotation animation using Three.js tweening
-    - Install and configure TWEEN.js or use Three.js built-in animation
-    - Create `rotateTube(direction: number)` method with smooth interpolation
-    - Implement easing functions for natural rotation feel
-    - Ensure rotation wraps correctly at 2π radians
-  - Ensure tetrominoes maintain horizontal orientation during tube rotation
-    - Apply inverse rotation to tetromino meshes to keep them horizontal
-    - Update tetromino world positions during tube rotation
-    - Maintain consistent visual appearance regardless of tube rotation
-  - Write tests for rotation boundary handling and animation smoothness
-    - Test rotation wrapping at 0/2π boundaries
-    - Verify tetrominoes maintain horizontal orientation
-    - Test rapid rotation inputs don't break animation
-    - Measure animation frame consistency
+- [ ] 6.1 Add rotation properties to game state
+  - Update GameState interface with `tubeRotation` and `targetRotation` properties
+  - Add rotation speed constant (π/4 radians per step)
+  - Initialize rotation values in game state
+  - _Requirements: 1.3, 1.4, 4.3_
+- [ ] 6.2 Create tube rotation animation system
+  - Create `src/game/TubeRotationManager.ts` file
+  - Implement `rotateTube(direction: number)` method with smooth interpolation
+  - Add easing functions for natural rotation feel
+  - Handle rotation wrapping at 2π radians
+  - _Requirements: 1.3, 1.4, 4.3_
+- [ ] 6.3 Maintain tetromino orientation during rotation
+  - Apply inverse rotation to tetromino meshes
+  - Update tetromino world positions during tube rotation
+  - Ensure consistent visual appearance
+  - _Requirements: 1.3, 1.4, 4.3_
+- [ ] 6.4 Write tests for rotation mechanics
+  - Create `src/game/__tests__/TubeRotationManager.test.ts`
+  - Test rotation wrapping and boundary handling
+  - Test tetromino orientation maintenance
   - _Requirements: 1.3, 1.4, 4.3_
 
 - [ ] 7. Add piece falling and collision detection
-  - Implement gravity system for tetromino pieces falling downward
-    - Add `fallTimer: number` and `fallSpeed: number` to game state
-    - Create `updateFalling(deltaTime: number)` method for time-based falling
-    - Implement variable fall speeds based on game level
-    - Add soft drop functionality for faster falling
-  - Create collision detection for pieces hitting bottom or other pieces
-    - Implement `checkCollision(tetromino: Tetromino, position: Vector3): boolean`
-    - Check collision with tube bottom boundary
-    - Check collision with existing pieces in grid
-    - Handle collision detection during tube rotation
-  - Add piece locking mechanism when collision occurs
-    - Create `lockPiece()` method to place piece in grid permanently
-    - Implement lock delay timer for player adjustment time
-    - Generate new piece after locking current piece
-    - Update visual representation when piece locks
-  - Write unit tests for collision detection accuracy
-    - Test collision with bottom boundary
-    - Test collision with existing pieces at various positions
-    - Test collision during tube rotation scenarios
-    - Verify lock timing and new piece generation
+- [ ] 7.1 Implement gravity system
+  - Add `fallTimer` and `fallSpeed` properties to GameState
+  - Create `src/game/GravityManager.ts` file
+  - Implement `updateFalling(deltaTime: number)` method
+  - Add soft drop functionality
+  - _Requirements: 2.1, 1.2_
+- [ ] 7.2 Create collision detection system
+  - Create `src/game/CollisionDetector.ts` file
+  - Implement `checkCollision(tetromino: Tetromino, position: Vector3): boolean`
+  - Check collision with tube bottom and existing pieces
+  - Handle collision during tube rotation
+  - _Requirements: 2.1, 1.2_
+- [ ] 7.3 Add piece locking mechanism
+  - Implement `lockPiece()` method in game engine
+  - Add lock delay timer for player adjustment
+  - Generate new piece after locking
+  - Update visual representation
+  - _Requirements: 2.1, 1.2_
+- [ ] 7.4 Write tests for collision and falling
+  - Create `src/game/__tests__/CollisionDetector.test.ts`
+  - Test collision detection accuracy
+  - Test lock timing and new piece generation
   - _Requirements: 2.1, 1.2_
 
 - [ ] 8. Implement input handling system
-  - Create InputController class for keyboard input processing
-    - Set up event listeners for keydown/keyup events
-    - Create key mapping configuration (Arrow keys, WASD, Space, etc.)
-    - Implement key state tracking for held keys vs single presses
-    - Add support for custom key bindings
-  - Map keys to tube rotation (left/right) and piece actions (soft drop, hard drop, rotate)
-    - Left/Right arrows: rotate tube clockwise/counterclockwise
-    - Down arrow: soft drop (faster falling)
-    - Space: hard drop (instant drop to bottom)
-    - Up arrow: rotate current tetromino piece
-    - P: pause/unpause game
-  - Add input rate limiting to prevent excessive commands
-    - Implement debouncing for rotation commands (prevent spam)
-    - Add repeat delay for held keys (initial delay + repeat rate)
-    - Create input buffer for smooth gameplay during lag
-    - Prevent input processing during animations or game over
-  - Write integration tests for input response
-    - Test all key mappings trigger correct game actions
-    - Verify rate limiting prevents input spam
-    - Test input during various game states (playing, paused, game over)
-    - Test simultaneous key presses and conflicts
+- [ ] 8.1 Create InputController class
+  - Create `src/input/InputController.ts` file
+  - Set up event listeners for keydown/keyup events
+  - Implement key state tracking for held vs single presses
+  - _Requirements: 1.3, 1.4, 4.3_
+- [ ] 8.2 Define key mappings and actions
+  - Create key mapping configuration (Arrow keys, WASD, Space, P)
+  - Map keys to tube rotation and piece actions
+  - Implement action callbacks for game engine
+  - _Requirements: 1.3, 1.4, 4.3_
+- [ ] 8.3 Add input rate limiting and buffering
+  - Implement debouncing for rotation commands
+  - Add repeat delay for held keys
+  - Create input buffer for smooth gameplay
+  - _Requirements: 1.3, 1.4, 4.3_
+- [ ] 8.4 Write tests for input handling
+  - Create `src/input/__tests__/InputController.test.ts`
+  - Test key mappings and rate limiting
+  - Test input during various game states
   - _Requirements: 1.3, 1.4, 4.3_
 
 - [ ] 9. Add line clearing and scoring system
-  - Implement ring clearing logic when complete rings are formed
-    - Create `clearRings(ringIndices: number[])` method
-    - Remove all pieces from completed rings
-    - Move all pieces above cleared rings down by appropriate number of rows
-    - Handle multiple simultaneous ring clears
-  - Create scoring system with points for cleared rings and bonus for multiple rings
-    - Implement base scoring: 100 points per ring cleared
-    - Add multipliers: 2x for 2 rings, 3x for 3 rings, 4x for 4+ rings (Tetris bonus)
-    - Include level multiplier for higher difficulty scoring
-    - Track total lines cleared for level progression
-  - Add visual feedback for ring clearing animations
-    - Create flashing/highlighting effect for completed rings before clearing
-    - Implement smooth animation for pieces falling after ring clear
-    - Add particle effects or visual flourishes for multiple ring clears
-    - Display score popup animations when rings are cleared
-  - Write unit tests for scoring calculations and ring clearing
-    - Test scoring formulas for single and multiple ring clears
-    - Verify pieces fall correctly after rings are cleared
-    - Test edge cases like clearing rings at top/bottom of tube
-    - Validate line count tracking for level progression
+- [ ] 9.1 Implement ring clearing logic
+  - Create `src/game/RingClearManager.ts` file
+  - Implement `clearRings(ringIndices: number[])` method
+  - Handle removing pieces and moving remaining pieces down
+  - _Requirements: 2.2, 2.3_
+- [ ] 9.2 Create scoring system
+  - Create `src/game/ScoreManager.ts` file
+  - Implement base scoring (100 points per ring) with multipliers
+  - Add level multiplier and track lines cleared
+  - Update GameState with score properties
+  - _Requirements: 2.2, 2.3_
+- [ ] 9.3 Add visual feedback for ring clearing
+  - Create flashing/highlighting effect for completed rings
+  - Implement smooth falling animation after ring clear
+  - Add score popup animations
+  - _Requirements: 2.2, 2.3_
+- [ ] 9.4 Write tests for scoring and ring clearing
+  - Create `src/game/__tests__/ScoreManager.test.ts`
+  - Test scoring formulas and ring clearing logic
+  - Test edge cases and level progression
   - _Requirements: 2.2, 2.3_
 
 - [ ] 10. Implement game progression and difficulty
-  - Create level system that increases falling speed over time
-    - Start at level 1 with base fall speed (e.g., 1 second per row)
-    - Increase level every 10 lines cleared
-    - Reduce fall time by 10% per level (exponential difficulty increase)
-    - Cap minimum fall time to maintain playability
-  - Add game over detection when pieces reach top of tube
-    - Check if new piece spawn position is occupied
-    - Implement "lock out" game over (piece locks above visible area)
-    - Add "block out" game over (piece cannot spawn due to obstruction)
-    - Trigger game over state and stop piece generation
-  - Implement score and level display
-    - Create UI overlay showing current score, level, and lines cleared
-    - Add next piece preview window
-    - Display current fall speed or time remaining
-    - Show high score tracking (localStorage persistence)
-  - Write tests for level progression and game over conditions
-    - Test level increases at correct line intervals
-    - Verify fall speed changes appropriately with level
-    - Test game over triggers in various scenarios
-    - Validate UI updates correctly with game state changes
+- [ ] 10.1 Create level progression system
+  - Create `src/game/LevelManager.ts` file
+  - Implement level increases every 10 lines cleared
+  - Reduce fall time by 10% per level with minimum cap
+  - Update GameState with level properties
+  - _Requirements: 3.1, 3.2, 3.3_
+- [ ] 10.2 Add game over detection
+  - Implement spawn position occupation check
+  - Add "lock out" and "block out" game over conditions
+  - Trigger game over state and stop piece generation
+  - _Requirements: 3.1, 3.2, 3.3_
+- [ ] 10.3 Create UI overlay for game information
+  - Create `src/ui/GameUI.ts` file
+  - Display score, level, lines cleared, and next piece
+  - Add high score tracking with localStorage
+  - _Requirements: 3.1, 3.2, 3.3_
+- [ ] 10.4 Write tests for progression and game over
+  - Create `src/game/__tests__/LevelManager.test.ts`
+  - Test level progression and fall speed changes
+  - Test game over conditions and UI updates
   - _Requirements: 3.1, 3.2, 3.3_
 
 - [ ] 11. Add visual rendering for tetrominoes
-  - Create 3D block meshes for tetromino pieces using BoxGeometry
-    - Create standard block size (e.g., 1x1x1 units) with slight gaps between blocks
-    - Add rounded edges or beveled corners for visual appeal
-    - Implement consistent block proportions that fit tube segments
-    - Create reusable block geometry for all tetromino types
-  - Implement different materials/colors for each tetromino type
-    - Define color scheme: I=cyan, O=yellow, T=purple, S=green, Z=red, J=blue, L=orange
-    - Create MeshLambertMaterial or MeshPhongMaterial for each color
-    - Add subtle texture or normal maps for visual depth
-    - Implement emissive properties for active piece highlighting
-  - Use InstancedMesh for efficient rendering of multiple blocks
-    - Create InstancedMesh for each tetromino color/type
-    - Update instance matrices for block positions efficiently
-    - Implement frustum culling for off-screen blocks
-    - Batch render calls to minimize draw calls
-  - Add visual distinction between active piece and placed pieces
-    - Make active piece slightly brighter or add outline effect
-    - Reduce opacity or saturation of placed pieces
-    - Add subtle animation (pulsing, glowing) to active piece
-    - Implement different lighting for active vs placed pieces
+- [ ] 11.1 Create 3D block geometry and materials
+  - Create `src/rendering/BlockRenderer.ts` file
+  - Create BoxGeometry with standard 1x1x1 size and slight gaps
+  - Define color scheme and materials for each tetromino type
+  - _Requirements: 4.2, 4.4_
+- [ ] 11.2 Implement efficient block rendering
+  - Use InstancedMesh for each tetromino color/type
+  - Update instance matrices for block positions efficiently
+  - Implement frustum culling for performance
+  - _Requirements: 4.2, 4.4_
+- [ ] 11.3 Add visual distinction for active vs placed pieces
+  - Make active piece brighter with outline effect
+  - Reduce opacity/saturation of placed pieces
+  - Add subtle animation for active piece
+  - _Requirements: 4.2, 4.4_
+- [ ] 11.4 Write tests for rendering system
+  - Create `src/rendering/__tests__/BlockRenderer.test.ts`
+  - Test block creation and material assignment
+  - Test instance matrix updates and performance
   - _Requirements: 4.2, 4.4_
 
 - [ ] 12. Implement piece preview and placement feedback
-  - Add ghost piece showing where active piece will land
-    - Calculate landing position using collision detection
-    - Render ghost piece with transparent/wireframe material
-    - Update ghost position in real-time as tube rotates
-    - Hide ghost piece when it overlaps with active piece
-  - Create visual preview of next piece
-    - Add separate small 3D scene for next piece display
-    - Position next piece in UI overlay area
-    - Rotate next piece slowly for better visibility
-    - Update preview when new piece is generated
-  - Implement smooth animations for piece placement
-    - Add smooth falling animation with easing
-    - Create lock-in animation when piece is placed
-    - Implement tube rotation animation with momentum
-    - Add subtle camera shake or zoom effects for dramatic moments
-  - Write visual tests for preview accuracy
-    - Verify ghost piece matches actual landing position
-    - Test ghost piece updates correctly during tube rotation
-    - Validate next piece preview shows correct piece type and color
-    - Test animation smoothness and timing consistency
+- [ ] 12.1 Add ghost piece functionality
+  - Create `src/rendering/GhostPiece.ts` file
+  - Calculate landing position using collision detection
+  - Render ghost piece with transparent/wireframe material
+  - Update ghost position in real-time during tube rotation
+  - _Requirements: 4.4_
+- [ ] 12.2 Create next piece preview
+  - Add separate small 3D scene for next piece display
+  - Position next piece in UI overlay area
+  - Implement slow rotation for better visibility
+  - _Requirements: 4.4_
+- [ ] 12.3 Implement smooth placement animations
+  - Add smooth falling animation with easing
+  - Create lock-in animation when piece is placed
+  - Add subtle camera effects for dramatic moments
+  - _Requirements: 4.4_
+- [ ] 12.4 Write tests for preview systems
+  - Create `src/rendering/__tests__/GhostPiece.test.ts`
+  - Test ghost piece accuracy and updates
+  - Test next piece preview functionality
   - _Requirements: 4.4_
 
 - [ ] 13. Add game state management and controls
-  - Implement pause/resume functionality
-    - Add pause state to GameState enum (Playing, Paused, GameOver)
-    - Pause all timers and animations when paused
-    - Display pause overlay with resume instructions
-    - Prevent input processing except for unpause command
-  - Add game restart capability
-    - Create `resetGame()` method to clear grid and reset state
-    - Reset score, level, and lines cleared to initial values
-    - Generate new starting piece and clear tube rotation
-    - Provide restart option from game over screen and pause menu
-  - Create game over screen with final score
-    - Display final score, level reached, and total lines cleared
-    - Show high score comparison and new high score celebration
-    - Provide options to restart game or return to main menu
-    - Add social sharing functionality for high scores
-  - Write integration tests for game state transitions
-    - Test pause/resume maintains game state correctly
-    - Verify restart resets all game components properly
-    - Test game over triggers and screen display
-    - Validate state transitions don't cause memory leaks
+- [ ] 13.1 Implement pause/resume functionality
+  - Update GameStatus enum with Paused state
+  - Pause all timers and animations when paused
+  - Display pause overlay with resume instructions
+  - _Requirements: 3.3_
+- [ ] 13.2 Add game restart capability
+  - Create `resetGame()` method in game engine
+  - Reset score, level, lines cleared to initial values
+  - Generate new starting piece and clear tube rotation
+  - _Requirements: 3.3_
+- [ ] 13.3 Create game over screen
+  - Display final score, level, and lines cleared
+  - Show high score comparison and celebration
+  - Provide restart and main menu options
+  - _Requirements: 3.3_
+- [ ] 13.4 Write tests for game state management
+  - Create `src/game/__tests__/GameStateManager.test.ts`
+  - Test pause/resume and restart functionality
+  - Test game over triggers and transitions
   - _Requirements: 3.3_
 
 - [ ] 14. Optimize performance and add error handling
-  - Implement object pooling for tetromino pieces
-    - Create TetrominoPool class to reuse piece objects
-    - Pool mesh instances to avoid frequent creation/destruction
-    - Implement efficient allocation and deallocation strategies
-    - Monitor pool usage and adjust pool sizes dynamically
-  - Add WebGL context loss recovery
-    - Listen for webglcontextlost and webglcontextrestored events
-    - Implement texture and geometry restoration after context loss
-    - Gracefully handle context loss during gameplay
-    - Display user-friendly message during context restoration
-  - Implement fallback rendering for performance issues
-    - Detect low frame rates and reduce visual quality automatically
-    - Implement simplified rendering mode with fewer effects
-    - Reduce particle effects and animations on slower devices
-    - Provide manual graphics quality settings
-  - Add comprehensive error boundaries and logging
-    - Implement try-catch blocks around critical game operations
-    - Add detailed logging for debugging and error tracking
-    - Create user-friendly error messages for common issues
-    - Implement crash reporting and recovery mechanisms
+- [ ] 14.1 Implement object pooling
+  - Create `src/utils/TetrominoPool.ts` file
+  - Pool mesh instances to avoid frequent creation/destruction
+  - Implement efficient allocation and deallocation strategies
+  - _Requirements: 4.3_
+- [ ] 14.2 Add WebGL context loss recovery
+  - Listen for webglcontextlost and webglcontextrestored events
+  - Implement texture and geometry restoration
+  - Display user-friendly message during restoration
+  - _Requirements: 4.3_
+- [ ] 14.3 Implement performance fallbacks
+  - Detect low frame rates and reduce visual quality
+  - Implement simplified rendering mode
+  - Provide manual graphics quality settings
+  - _Requirements: 4.3_
+- [ ] 14.4 Add error handling and logging
+  - Implement try-catch blocks around critical operations
+  - Add detailed logging for debugging
+  - Create user-friendly error messages
   - _Requirements: 4.3_
 
 - [ ] 15. Create comprehensive test suite
-  - Write end-to-end tests for complete gameplay scenarios
-    - Test complete game from start to game over
-    - Simulate full gameplay sessions with piece placement and line clearing
-    - Test level progression and difficulty scaling
-    - Validate score calculations throughout entire games
-  - Add performance tests for frame rate and memory usage
-    - Monitor frame rate during intensive gameplay (many pieces on screen)
-    - Test memory usage over extended play sessions
-    - Benchmark rendering performance with different graphics settings
-    - Profile CPU usage during complex animations and calculations
-  - Implement visual regression tests for rendering accuracy
-    - Capture screenshots of key game states for comparison
-    - Test rendering consistency across different browsers/devices
-    - Verify visual elements render correctly after code changes
-    - Test camera positioning and tube visibility from all angles
-  - Create automated tests for all game mechanics
-    - Test all tetromino rotations and placements
-    - Verify collision detection in all scenarios
-    - Test tube rotation mechanics and coordinate conversions
-    - Validate scoring, level progression, and game over conditions
+- [ ] 15.1 Write end-to-end gameplay tests
+  - Create `src/__tests__/e2e/GameplayE2E.test.ts`
+  - Test complete game from start to game over
+  - Test level progression and difficulty scaling
+  - _Requirements: 1.1, 2.1, 3.1, 4.1_
+- [ ] 15.2 Add performance tests
+  - Create `src/__tests__/performance/Performance.test.ts`
+  - Monitor frame rate during intensive gameplay
+  - Test memory usage over extended sessions
+  - _Requirements: 1.1, 2.1, 3.1, 4.1_
+- [ ] 15.3 Implement visual regression tests
+  - Create `src/__tests__/visual/VisualRegression.test.ts`
+  - Capture screenshots of key game states
+  - Test rendering consistency across browsers
+  - _Requirements: 1.1, 2.1, 3.1, 4.1_
+- [ ] 15.4 Create automated game mechanics tests
+  - Test all tetromino rotations and placements
+  - Verify collision detection and tube rotation
+  - Validate scoring and game over conditions
   - _Requirements: 1.1, 2.1, 3.1, 4.1_
