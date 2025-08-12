@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Tube Tetris</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+            font-size: 18px;
+        }
+        
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            z-index: 100;
+            font-size: 14px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div>Score: <span id="score">0</span></div>
+            <div>Level: <span id="level">1</span></div>
+            <div>Lines: <span id="lines">0</span></div>
+        </div>
+        
+        <div id="controls-info">
+            <div>← → : Rotate Tube</div>
+            <div>↓ : Soft Drop</div>
+            <div>Space : Hard Drop</div>
+            <div>↑ : Rotate Piece</div>
+            <div>P : Pause</div>
+        </div>
+    </div>
+    
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
