@@ -1,22 +1,5 @@
 import { Vector2, Vector3, Color, Scene, PerspectiveCamera, WebGLRenderer } from 'three';
-
-// Enums
-export enum TetrominoType {
-    I = 'I',
-    O = 'O',
-    T = 'T',
-    S = 'S',
-    Z = 'Z',
-    J = 'J',
-    L = 'L'
-}
-
-export enum GameStatus {
-    PLAYING = 'PLAYING',
-    PAUSED = 'PAUSED',
-    GAME_OVER = 'GAME_OVER',
-    MENU = 'MENU'
-}
+import { TetrominoType, GameStatus } from './enums';
 
 // Core Interfaces
 export interface TetrominoShape {
