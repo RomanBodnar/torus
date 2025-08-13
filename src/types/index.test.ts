@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { TetrominoType, GameStatus } from './index';
+import { TetrominoType, GameStatus } from './enums';
 
 describe('Core Types and Enums', () => {
   test('TetrominoType enum should have all expected values', () => {
