@@ -16,7 +16,7 @@
   - _Requirements: 1.1, 4.1_
 
 - [ ] 2. Implement TubeGeometry and coordinate system
-- [ ] 2.1 Create TubeGeometry class with basic properties
+- [x] 2.1 Create TubeGeometry class with basic properties
   - Create `src/core/TubeGeometry.ts` file
   - Implement constructor with radius=5, height=20, segments=8 defaults
   - Add readonly properties for radius, height, segments
