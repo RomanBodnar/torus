@@ -16,7 +16,7 @@ export class TubeGeometry implements ITubeGeometry {
      * @param height - The height of the tube (default: 20)
      * @param segments - The number of segments around the circumference (default: 8)
      */
-    constructor(radius: number = 5, height: number = 20, segments: number = 8) {
+    constructor(radius: number = 5, height: number = 20, segments: number = 16) {
         this.radius = radius;
         this.height = height;
         this.segments = segments;

@@ -21,12 +21,12 @@
   - Implement constructor with radius=5, height=20, segments=8 defaults
   - Add readonly properties for radius, height, segments
   - _Requirements: 1.1, 4.1_
-- [ ] 2.2 Add coordinate conversion methods
+- [x] 2.2 Add coordinate conversion methods
   - Implement `getSegmentAngle(segment: number): number` method
   - Implement `tubeToWorld(segment: number, row: number): Vector3` method
   - Implement `worldToTube(position: Vector3): {segment: number, row: number}` method
   - _Requirements: 1.1, 4.1_
-- [ ] 2.3 Write unit tests for TubeGeometry
+- [x] 2.3 Write unit tests for TubeGeometry
   - Create `src/core/__tests__/TubeGeometry.test.ts`
   - Test coordinate conversion round-trip accuracy
   - Test boundary cases and wrapping behavior
